@@ -1,0 +1,60 @@
+name: Test, Build and Upload artifact
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 8 ]
+    name: Java ${{ matrix.java }} compile
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Setup java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - run: mvn -f pom.xml clean compile
+
+  build:
+    runs-on: ubuntu-latest
+    needs: compile
+    name: Java 8 build, deliver artifact and container
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Setup PostgreSQL for integration test
+        uses: huaxk/postgis-action@v1
+        with:
+          postgresql version: '11'  # See https://https://hub.docker.com/r/mdillon/postgis for available versions, if it is not specified, use the default value 'latest'
+          postgresql password: ${{ secrets.DatabasePassword }}   # This environment variable sets the superuser password for PostgreSQL, maybe string or secrets, the default superuser is defined by the input environment variable: postgresql user.
+          postgresql user: 'postgres'  # This optional environment variable is used in conjunction with postgresql password to set a user and its password. This variable will create the specified user with superuser power and a database with the same name. If it is not specified, then the default user of 'postgres' will be used.
+          postgresql db: 'genredb_test'
+
+      - name: Test and build project
+        run: mvn -f pom.xml clean install -P prod
+
+      - name: Upload Maven build artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: genre-service-artifact.jar
+          path: ./target/genre-service-0.0.1-SNAPSHOT.jar
+
+      - name: Docker login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Docker Build
+        run: docker build -t ${{ secrets.DOCKER_USER }}/genre-service:latest .
+
+      - name: Upload container to Docker Hub with Push
+        run: docker push ${{ secrets.DOCKER_USER }}/genre-service:latest
