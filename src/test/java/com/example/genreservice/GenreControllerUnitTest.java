@@ -63,5 +63,16 @@ public class GenreControllerUnitTest {
                 .andExpect(jsonPath("$[1].abbreviation", is("Ad")));
     }
 
+    @Test
+    public void givenGenre_whenGetGenreByName_thenReturnJsonGenre() throws Exception {
+        Genre genre = new Genre("Action", "Ac");
+        given(genreRepository.findGenreByName("Action")).willReturn(genre);
+        mockMvc.perform(get("/genres/genre/{name}", "Action"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Action")))
+                .andExpect(jsonPath("$.abbreviation", is("Ac")));
+    }
+
 
 }

@@ -66,4 +66,13 @@ public class GenreControllerIntegrationTest {
                 .andExpect(jsonPath("$[1].abbreviation", is("Ad")));
     }
 
+    @Test
+    public void givenGenre_whenGetGenreByName_thenReturnJsonGenre() throws Exception {
+        mockMvc.perform(get("/genres/genre/{name}", "Action"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name", is("Action")))
+                .andExpect(jsonPath("$.abbreviation", is("Ac")));
+    }
+
 }

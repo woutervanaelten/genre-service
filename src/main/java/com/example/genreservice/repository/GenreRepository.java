@@ -10,4 +10,5 @@ import java.util.List;
 public interface GenreRepository extends JpaRepository<Genre, Long> {
     List<Genre> findGenresByNameContaining(String name);
     List<Genre> findGenreByAbbreviationContaining(String abbreviation);
+    Genre findGenreByName(String name);
 }
