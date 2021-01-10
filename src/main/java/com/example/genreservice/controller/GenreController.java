@@ -16,6 +16,11 @@ public class GenreController {
     @Autowired
     private GenreRepository genreRepository;
 
+    @GetMapping("/genres/all")
+    public List<Genre> getGenres(){
+        return genreRepository.findAll();
+    }
+
     @GetMapping("/genres/name/{name}")
     public List<Genre> getGenresByName(@PathVariable String name){
         return genreRepository.findGenresByNameContaining(name);

@@ -30,6 +30,23 @@ public class GenreControllerUnitTest {
     @MockBean
     private GenreRepository genreRepository;
 
+    @Test
+    public void whenGetGenres_thenReturnJsonGenres() throws Exception {
+        Genre genre1 = new Genre("Action", "Ac");
+        Genre genre2 = new Genre("Adventure", "Ad");
+        List<Genre> genreList = new ArrayList<>();
+        genreList.add(genre1);
+        genreList.add(genre2);
+        given(genreRepository.findAll()).willReturn(genreList);
+        mockMvc.perform(get("/genres/all", "Action"))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].name", is("Action")))
+                .andExpect(jsonPath("$[0].abbreviation", is("Ac")))
+                .andExpect(jsonPath("$[1].name", is("Adventure")))
+                .andExpect(jsonPath("$[1].abbreviation", is("Ad")));
+    }
 
     @Test
     public void givenGenres_whenGetGenresByName_thenReturnJsonGenres() throws Exception {
