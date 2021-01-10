@@ -16,6 +16,21 @@ public class GenreController {
     @Autowired
     private GenreRepository genreRepository;
 
+    @PostConstruct
+    public void fillDB(){
+        genreRepository.deleteAll();
+        if(genreRepository.count()==0) {
+            genreRepository.save(new Genre("Action","Ac"));
+            genreRepository.save(new Genre("Adventure","Ad"));
+            genreRepository.save(new Genre("Drama","Dr"));
+            genreRepository.save(new Genre("Crime","Cr"));
+            genreRepository.save(new Genre("Sci-Fi","Sc"));
+            genreRepository.save(new Genre("Biography","Bi"));
+            genreRepository.save(new Genre("History","Hi"));
+        }
+        System.out.println("Genre test: " + genreRepository.findGenresByNameContaining("Action"));
+    }
+
     @GetMapping("/genres/all")
     public List<Genre> getGenres(){
         return genreRepository.findAll();
